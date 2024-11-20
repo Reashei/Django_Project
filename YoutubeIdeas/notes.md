@@ -121,3 +121,60 @@ class Vote(models.Model):
     def __str__(self):
         return f"id {self.id}" # zwracamy id aby pozbyc sie nazw obiektow
 ```
+
+REST API
+
+Instalujemy biblioteki django rest api
+```commandline
+pip install djangorestframework
+```
+
+Tworzymy serializer - coś co serializuje nam dane - proces który zamienia nam obiekt na dane np. json
+Tworzymy plik serializer.py
+
+```commandline
+from models import Vote, Idea
+from rest_framework import serializers
+
+class IdeaSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta: # przyjęcie w django, że zazwyczaj wewnętrzne klasy mają nazwe meta
+        model = Idea
+        fields = ['id', 'title', 'descirption', 'youtube_url', 'status'] # dodajemy nasze fieldy
+
+
+class VoteSerializer(serializers.HyperlinkedModelSerializer): # nazwaklasynaszej i serializer przyjmujemy
+    class Meta:
+        model = Vote
+        fields = ['idea', 'reason']
+
+
+# MVT model - view - template
+# view - widok odpowiada za odebranie żadania i kontakt z modelami w celu odebrania itneresujacych
+# danych i zwrocenie uzytkownikowi
+```
+
+Tworzymy widoki we views.py
+
+```commandline
+from .models import Idea, Vote
+from rest_framework import viewsets # import widoku z parametryzacja
+from .serializer import IdeaSerializer, VoteSerializer # importujemy nasze serializery
+
+class IdeaViewSet(viewsets.ModelViewSet):
+    queryset = Idea.objects.all() # pobeira wszystkie pomysły
+    serializer_class = IdeaSerializer
+
+
+class VoteViewSet(viewsets.ModelViewSet):
+    queryset = Vote.objects.all()
+    serializer_class = VoteSerializer
+```
+
+Tworzymy plik urls.py w ideas dla naszych endpointów do API
+
+
+Dorzucamy rest_framework do installed apps w settings.py
+```commandline
+INSTALLED_APPS = [
+    "rest_framework",
+```
