@@ -178,3 +178,51 @@ Dorzucamy rest_framework do installed apps w settings.py
 INSTALLED_APPS = [
     "rest_framework",
 ```
+
+Stawianie dockera!!
+
+Budujemy na nowo nasz projekt i przenosimy wszystkie zależności.
+Wchodzimy cd youtube
+Tworzymy plik requirement.txt, a zależności pobieramy poleceniem
+```commandline
+pip freeze > requirements.txt
+```
+
+Tworzymy plik z intrukcjami dla dockera (dockerfiles)
+Dockerfile w katalogu youtube głownym tworzymy
+```commandline
+FROM python:3 # python wersja 3
+WORKDIR /code # wskazujemy folder na którym bedziemy pracować
+COPY requirements.txt /code/ # kopiujemy nasz plik do naszego kontenera
+RUN pip install -r requirements.txt # instalujemy wszystkie zależności
+COPY . /code/ # skopiuj zawartosc calego folderu i wrzuć do folderu code
+```
+
+Obrazy możemy pobierac z dockerhuba
+
+Tworzymy plik docker-compose.yml, będzie zawierał informacje o tym jakie będziemy potrzebować usługi
+```commandline
+version: "3.9"
+
+services:
+  db: # pierwsza baza danych
+    image: postgres # to ma byc obraz ktory ma byc postgresem
+    environment: # uwierzytelnianie bazy
+      - POSTGRES_DB=youtube
+      - POSTGRES_USER=youtube
+      - POSTGRES_PASSWORD=youtube123
+  web: # baza odpowiadajaca za strone internetowa
+    build: . # budujemy nasz docker file
+    command: python manage.py runserver 0.0.0.0:8000 # nasluchuj na dowolnym IP na porcie 8000
+    volumes:
+      - .:/code/ # podpinamy nasz projektowy folder do folderu code aby moc go edytowac na biezaco
+    ports:
+      - "8000:8000" # prziekierowanie z portu local host na kontenerowy 8000
+    depends_on:
+      - db # uruchamiamy web dopiero po wstaniu db
+```
+
+Uruchamiamy poleceniem
+```commandline
+docker-compose up
+```
