@@ -7,8 +7,10 @@ services:
       - POSTGRES_DB=youtube
       - POSTGRES_USER=youtube
       - POSTGRES_PASSWORD=youtube123
+    ports:
+      - "5432:5432"
   web: # baza odpowiadajaca za strone internetowa
-    build: . # budujemy nasz docker file
+    build: youtube # budujemy nasz docker file
     command: python manage.py runserver 0.0.0.0:8000 # nasluchuj na dowolnym IP na porcie 8000
     volumes:
       - .:/code/ # podpinamy nasz projektowy folder do folderu code aby moc go edytowac na biezaco

@@ -211,8 +211,10 @@ services:
       - POSTGRES_DB=youtube
       - POSTGRES_USER=youtube
       - POSTGRES_PASSWORD=youtube123
+    ports:
+      - "5432:5432"
   web: # baza odpowiadajaca za strone internetowa
-    build: . # budujemy nasz docker file
+    build: youtube # budujemy nasz docker file
     command: python manage.py runserver 0.0.0.0:8000 # nasluchuj na dowolnym IP na porcie 8000
     volumes:
       - .:/code/ # podpinamy nasz projektowy folder do folderu code aby moc go edytowac na biezaco
@@ -224,5 +226,70 @@ services:
 
 Uruchamiamy poleceniem
 ```commandline
+docker-compose up
+```
+
+Konfigurujemy postgresa w youtube/settings.py
+
+Podmieniamy database, kopiuj wklej ze stronki tam wylistowanej:
+I zmieniamy konfiguracje na taka jak ustawilismy w docker-compose; port domyslny
+
+```commandline
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "youtube",
+        "USER": "youtube",
+        "PASSWORD": "youtube123",
+        "HOST": "db",
+        "PORT": "5432",
+    }
+}
+```
+
+Pózniej sprawdzamy procesy dockera poleceniem
+```commandline
+docker ps
+```
+
+Bierzemy id naszej webowki tj.
+480565.. i poleceniem
+```
+docker exec -it 480 bash
+```
+
+I instalujemy tutaj brakującą bibliotekę:
+```commandline
+pip install psycopg2
+```
+
+I restart dockera
+ctrl c i docker-compose up
+
+Dodajemy w requirements.txt:
+psycopg2==2.8.6
+
+Pozniej docker-compose build web i docker-compose up
+
+Na dzialajacym kontenerze drugi terminal i robimy znowu:
+docker exec -it 420 i robimy migracje python manage.py migrate
+
+I teraz powinna nam działać stronka i możemy zrobić super usera:
+```commandline
+python manage.py createsuperuser
+```
+dane:
+login: michal
+password: michal123
+
+```commandline
+#DEV do readme ( co bylo wykonane )
+1. Listing available containters:
+docker ps
+2. To enter container:
+docker exec -it {id} bash
+3. To rebuild container:
+docker-compose build {nazwa}
+4. Start projects containers:
 docker-compose up
 ```
